@@ -28,30 +28,14 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-/**
- * <p>Handles reading the files representing the affinity matrix. Since the affinity
- * matrix is representative of a graph, each line in all the files should
- * take the form:</p>
- *
- * {@code i,j,value}
- *
- * <p>where {@code i} and {@code j} are the {@code i}th and
- * {@code j} data points in the entire set, and {@code value}
- * represents some measurement of their relative absolute magnitudes. This
- * is, simply, a method for representing a graph textually.
- */
 public class AffinityMatrixInputMapper
     extends Mapper<LongWritable, Text, IntWritable,MatrixEntryWritable> {
-
-  private static final Logger log = LoggerFactory.getLogger(AffinityMatrixInputMapper.class);
-
   private static final Pattern COMMA_PATTERN = Pattern.compile(",");
-
   @Override
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
+
     String[] elements = COMMA_PATTERN.split(value.toString());
-    log.debug("(DEBUG - MAP) Key[{}], Value[{}]", key.get(), value);
 
     // enforce well-formed textual representation of the graph
     if (elements.length != 3) {

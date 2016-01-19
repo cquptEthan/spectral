@@ -52,7 +52,7 @@ public final class AffinityMatrixInputJob {
     job.setMapOutputValueClass(DistributedRowMatrix.MatrixEntryWritable.class);
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(VectorWritable.class);
-    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    job.setOutputFormatClass(SequenceFileshiOutputFormat.class);
     job.setMapperClass(AffinityMatrixInputMapper.class);   
     job.setReducerClass(AffinityMatrixInputReducer.class);
 
