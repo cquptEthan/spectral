@@ -1,6 +1,12 @@
 package edu.cqupt.spectral.diagonalize;
 
+import edu.cqupt.spectral.conf.Tools;
 import edu.cqupt.spectral.model.IntDoublePairWritable;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
+import org.apache.hadoop.hbase.mapreduce.TableReducer;
+import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
@@ -17,18 +23,11 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class DiagonalizeReducer
-        extends Reducer<NullWritable, IntDoublePairWritable, NullWritable, VectorWritable> {
-
+        extends TableReducer<IntWritable,DoubleWritable,ImmutableBytesWritable> {
     @Override
-    protected void reduce(NullWritable key, Iterable<IntDoublePairWritable> values,
-                          Context context) throws IOException, InterruptedException {
-        // create the return vector
-        Vector retval = new DenseVector(context.getConfiguration().getInt("edu.cqupt.spectral.dimensions",Integer.MAX_VALUE));
-        // put everything in its correct spot
-        for (IntDoublePairWritable e : values) {
-            retval.setQuick(e.getKey(), e.getValue());
-        }
-        // write it out
-        context.write(key, new VectorWritable(retval));
+    protected void reduce(IntWritable key, Iterable<DoubleWritable> values, Context context) throws IOException, InterruptedException {
+         Put put = new Put(key.toString().getBytes());
+         put.add(Tools.DIAGONALIZE_FAMILY_NAME.getBytes(),Tools.DIAGONALIZE_VALUE_NAME.getBytes(),values.iterator().next().toString().getBytes());
+        context.write(null,put);
     }
 }
