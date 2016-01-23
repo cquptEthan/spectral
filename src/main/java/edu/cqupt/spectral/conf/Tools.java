@@ -31,16 +31,16 @@ public class Tools {
     public  static  final String DIAGONALIZE_FAMILY_NAME = "col";
     public  static  final String DIAGONALIZE_VALUE_NAME = "value";
 
-//    public  static final Long ROW= 2200L;      //100M
-//    public  static  final  Long COL = 1500L;
+    public  static final Long ROW= 22000L;      //100M
+    public  static  final  Long COL = 150L;
 
-    public  static final Long ROW= 22L;
-    public  static  final  Long COL = 15L;
+//    public  static final Long ROW= 22L;
+//    public  static  final  Long COL = 15L;
 
 
     public static Vector load(Configuration conf) throws IOException {
         Path[] files = HadoopUtil.getCachedFiles(conf);
-
+//        Integer.class
         if (files.length != 1) {
             throw new IOException("Cannot read Frequency list from Distributed Cache (" + files.length + ')');
         }

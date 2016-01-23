@@ -262,11 +262,9 @@ public class Spectral{
         Configuration conf = new Configuration();
         Path tempDir =  new Path( "Spectral");
         HadoopUtil.delete(conf, tempDir);
-        Path input = new Path("input");
-        Path init = new Path(tempDir,"init");
-        InitInputJob.runJob(input,init);
-        DiagonalizeJob.runJob(init);
-        LaplacianJob.runJob(init);
+        InitInputJob.runJob();
+        DiagonalizeJob.runJob();
+        LaplacianJob.runJob();
 
 
     }
