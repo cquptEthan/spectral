@@ -258,13 +258,15 @@ public class Spectral{
     public static void main(String[] args) throws Exception {
 
         initHbase();
-       int numDims =100;
+        int numDims =100;
         Configuration conf = new Configuration();
         Path tempDir =  new Path( "Spectral");
         HadoopUtil.delete(conf, tempDir);
-        InitInputJob.runJob();
-        DiagonalizeJob.runJob();
-        LaplacianJob.runJob();
+        Path input = new Path("input");
+        Path init = new Path(tempDir,"init");
+        InitInputJob.runJob(input,init);
+        DiagonalizeJob.runJob(init);
+        LaplacianJob.runJob(init);
 
 
     }

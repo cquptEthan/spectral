@@ -46,7 +46,7 @@ public class LanczosJob {
                 targetTable,        // output table
                 DiagonalizeReducer.class,    // reducer class
                 job);
-        job.setJarByClass(DiagonalizeJob.class);
+        job.setJarByClass(LanczosJob.class);
 
         boolean succeeded = job.waitForCompletion(true);
         if (!succeeded) {

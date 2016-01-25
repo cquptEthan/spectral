@@ -31,7 +31,7 @@ public class Tools {
     public  static  final String DIAGONALIZE_FAMILY_NAME = "col";
     public  static  final String DIAGONALIZE_VALUE_NAME = "value";
 
-    public  static final Long ROW= 22000L;      //100M
+    public  static final Long ROW= 10000L;      //100M
     public  static  final  Long COL = 150L;
 
 //    public  static final Long ROW= 22L;

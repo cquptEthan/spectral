@@ -21,10 +21,10 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class InitInputJob {
-    public static void runJob()
+    public static void runJob(Path input, Path output)
             throws IOException, InterruptedException, ClassNotFoundException {
         Configuration conf = new Configuration();
-//        HadoopUtil.delete(conf, output);
+        HadoopUtil.delete(conf, output);
 
 //        conf.setInt(Keys.AFFINITY_DIMENSIONS, rows);
         Job job = new Job(conf, "init");
@@ -32,7 +32,7 @@ public class InitInputJob {
         Scan scan = new Scan();
         job.setJarByClass(InitInputJob.class);
 //        job.setMap
-//        FileOutputFormat.setOutputPath(job,output);
+        FileOutputFormat.setOutputPath(job,output);
         TableMapReduceUtil.initTableMapperJob(Tools.AFFINITY_TABLE_NAME, scan, InitInputMapper.class, null,null, job);
         job.setNumReduceTasks(0);
         boolean succeeded = job.waitForCompletion(true);

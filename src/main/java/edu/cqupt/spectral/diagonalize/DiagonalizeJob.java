@@ -28,15 +28,17 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class DiagonalizeJob {
-    public static void runJob()
+    public static void runJob(Path affInput)
             throws IOException, ClassNotFoundException, InterruptedException {
         String sourceTable = Tools.AFFINITY_TABLE_NAME;
         String targetTable = Tools.DIAGONALIZE_TABLE_NAME;
         // set up all the job tasks
         Configuration conf = new Configuration();
-
+        Path diagOutput = new Path(affInput.getParent(), "diagonal");
+        HadoopUtil.delete(conf, diagOutput);
         Job job = new Job(conf, "DiagonalizeJob");
         Scan scan = new Scan();
+        FileInputFormat.addInputPath(job, affInput);
         FileOutputFormat.setOutputPath(job, diagOutput);
         TableMapReduceUtil.initTableMapperJob(
                 sourceTable,        // input table
