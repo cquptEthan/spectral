@@ -18,6 +18,8 @@ import java.util.Arrays;
  * To change this template use File | Settings | File Templates.
  */
 public class Tools {
+//    public  static  final String ZOOKEEPER ="localhost";
+    public  static  final String ZOOKEEPER ="scmhadoop-1";
     public  static  final String INIT_TABLE_NAME = "spectral_init";
     public  static  final String AFFINITY_TABLE_NAME = "spectral_affinity";
     public  static  final String DIAGONALIZE_TABLE_NAME = "spectral_diagonalize";
@@ -31,7 +33,7 @@ public class Tools {
     public  static  final String DIAGONALIZE_FAMILY_NAME = "col";
     public  static  final String DIAGONALIZE_VALUE_NAME = "value";
 
-    public  static final Long ROW= 10000L;      //100M
+    public  static final Long ROW= 1000L;      //100M
     public  static  final  Long COL = 150L;
 
 //    public  static final Long ROW= 22L;

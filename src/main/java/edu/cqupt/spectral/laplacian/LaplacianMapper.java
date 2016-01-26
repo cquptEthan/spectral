@@ -30,7 +30,7 @@ public class LaplacianMapper extends TableMapper<IntWritable,IntDoublePairWritab
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         Configuration configuration = HBaseConfiguration.create();
-        configuration.set("hbase.zookeeper.quorum", "scmhadoop-1");
+        configuration.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
         diagonalizeTable = new HTable(configuration, Tools.DIAGONALIZE_TABLE_NAME);
     }
 

@@ -30,6 +30,7 @@ public class LanczosJob {
         String targetTable = Tools.DIAGONALIZE_TABLE_NAME;
         // set up all the job tasks
         Configuration conf = new Configuration();
+        conf.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
         Job job = new Job(conf, "DiagonalizeJob");
         Scan scan = new Scan();
 //        FileInputFormat.addInputPath(job, affInput);

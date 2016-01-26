@@ -142,7 +142,8 @@ public class Spectral{
         Long row = Tools.ROW;
         Long col = Tools.COL;
         Configuration configuration = HBaseConfiguration.create();
-        configuration.set("hbase.zookeeper.quorum", "scmhadoop-1");
+//        configuration.set("hbase.zookeeper.quorum", "scmhadoop-1");
+//        configuration.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
         HBaseAdmin admin = new HBaseAdmin(configuration);
         
         if(admin.tableExists(Tools.INIT_TABLE_NAME)){
@@ -172,6 +173,7 @@ public class Spectral{
         
         HTableDescriptor initTableDesc = new HTableDescriptor(Tools.INIT_TABLE_NAME);
         initTableDesc.addFamily(new HColumnDescriptor(Tools.INIT_FAMILY_NAME));
+        initTableDesc.setMaxFileSize(1145720);
         admin.createTable(initTableDesc);
         Random random = new Random(System.currentTimeMillis());
         HTable initTable = new HTable(configuration,Tools.INIT_TABLE_NAME);
@@ -194,7 +196,10 @@ public class Spectral{
 
         HTableDescriptor affinityTableDesc = new HTableDescriptor(Tools.AFFINITY_TABLE_NAME);
         affinityTableDesc.addFamily(new HColumnDescriptor(Tools.AFFINITY_FAMILY_NAME));
+//        affinityTableDesc.getMaxFileSize()
+        affinityTableDesc.setMaxFileSize(1145720);
         admin.createTable(affinityTableDesc);
+
         HTable affinityTable = new HTable(configuration,Tools.AFFINITY_TABLE_NAME);
 
         List<Put> affinityPuts = new ArrayList<Put>();
@@ -257,11 +262,11 @@ public class Spectral{
     }
     public static void main(String[] args) throws Exception {
 
-        initHbase();
+//        initHbase();
         int numDims =100;
         Configuration conf = new Configuration();
         Path tempDir =  new Path( "Spectral");
-        HadoopUtil.delete(conf, tempDir);
+//        HadoopUtil.delete(conf, tempDir);
         Path input = new Path("input");
         Path init = new Path(tempDir,"init");
         InitInputJob.runJob(input,init);

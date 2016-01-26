@@ -34,6 +34,7 @@ public class DiagonalizeJob {
         String targetTable = Tools.DIAGONALIZE_TABLE_NAME;
         // set up all the job tasks
         Configuration conf = new Configuration();
+        conf.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
         Path diagOutput = new Path(affInput.getParent(), "diagonal");
         HadoopUtil.delete(conf, diagOutput);
         Job job = new Job(conf, "DiagonalizeJob");

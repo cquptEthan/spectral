@@ -13,10 +13,7 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.TableMapper;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.function.Functions;
 
@@ -32,7 +29,7 @@ import java.util.regex.Pattern;
  * Time: 9:13 AM
  * To change this template use File | Settings | File Templates.
  */
-public class InitInputMapper extends TableMapper<IntWritable,IntDoublePairWritable> {
+public class InitInputMapper extends TableMapper<NullWritable,NullWritable> {
     private HTable initTable;
     private HTable affinityTable;
     private double omg = 1000d;
@@ -52,15 +49,17 @@ public class InitInputMapper extends TableMapper<IntWritable,IntDoublePairWritab
         List<Put> puts = new ArrayList<Put>();
         List<Cell> cells = value.listCells();
             for (Cell cell : cells) {
-                Long secKey = Long.valueOf(new String(CellUtil.cloneQualifier(cell)));
+                Integer secKey = Integer.valueOf(new String(CellUtil.cloneQualifier(cell)));
                 Get fisrtGet = new Get(key.get());
                 Get secondGet = new Get(secKey.toString().getBytes());
                 Double sim = computeSimilarity(fisrtGet,secondGet);
+//                context.write(new IntWritable(secKey),new BytesWritable(sim.toString().getBytes()));
                 Put put = new Put(key.get());
                 put.add(Tools.AFFINITY_FAMILY_NAME.getBytes(),secKey.toString().getBytes(),sim.toString().getBytes());
                 puts.add(put);
             }
         affinityTable.put(puts);
+//        context.write(null,null);
     }
     private double computeSimilarity(Get firstGet , Get secondGet) throws IOException {
         Result firstRes = initTable.get(firstGet);
