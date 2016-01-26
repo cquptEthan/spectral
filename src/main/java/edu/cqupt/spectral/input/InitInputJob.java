@@ -29,7 +29,6 @@ public class InitInputJob {
         Configuration conf = new Configuration();
         conf.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
         HadoopUtil.delete(conf, output);
-
 //        conf.setInt(Keys.AFFINITY_DIMENSIONS, rows);
         Job job = new Job(conf, "init");
 //        HTable affinityTable = new HTable(HBaseConfiguration.create(), Tools.AFFINITY_TABLE_NAME);

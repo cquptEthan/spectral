@@ -1,17 +1,17 @@
 package edu.cqupt.spectral.qr;
 
 import edu.cqupt.spectral.conf.Tools;
+import edu.cqupt.spectral.model.IntDoublePairWritable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
-import org.apache.hadoop.hbase.mapreduce.TableMapper;
+import org.apache.hadoop.hbase.mapreduce.TableReducer;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.mahout.math.function.Functions;
+import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -21,70 +21,37 @@ import java.util.List;
 /**
  * Created with IntelliJ IDEA.
  * User: Ethan
- * Date: 1/25/16
- * Time: 5:12 PM
+ * Date: 1/26/16
+ * Time: 10:19 AM
  * To change this template use File | Settings | File Templates.
  */
-public class QrMapper extends TableMapper<IntWritable,IntWritable> {
+public class QrReducer extends TableReducer<IntWritable,IntWritable,ImmutableBytesWritable> {
     private HTable qTable;
     private HTable rTable;
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         Configuration configuration = HBaseConfiguration.create();
-        configuration.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
+        configuration.set("hbase.zookeeper.quorum", "scmhadoop-1");
         qTable = new HTable(configuration, Tools.Q_TABLE_NAME);
         rTable = new HTable(configuration, Tools.R_TABLE_NAME);
-
     }
 
     @Override
-    protected void map(ImmutableBytesWritable key, Result value, Context context) throws IOException, InterruptedException {
-
-//        QR
-        List<Cell> cells = value.listCells();
-//        cells.size()
-        double [] aList = new double[cells.size()];
-        double [] bList = new double[cells.size()];
-//        ArrayList<Double> aList = new ArrayList(cells.size());
-//        ArrayList<Double> bList = new ArrayList(cells.size());
-        int i = Integer.valueOf(new String(key.get())) ;
-        for (Cell cell : cells) {
-            int j = Integer.valueOf(new String(CellUtil.cloneQualifier(cell)));
-            aList[j] =  Double.valueOf(new String(CellUtil.cloneValue(cell)));
-            bList[j] =  Double.valueOf(new String(CellUtil.cloneValue(cell)));
-//            aList.add(j,Double.valueOf(new String(CellUtil.cloneValue(cell))));
-//            bList.add(j,Double.valueOf(new String(CellUtil.cloneValue(cell))));
+    protected void reduce(IntWritable key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+        ArrayList<Integer> integerArrayList = new ArrayList<Integer>();
+        for(IntWritable intWritable : values){
+            integerArrayList.add(intWritable.get());
         }
-
-        for(int k = 0 ; k < i ; k++){
-            double r = 0d;
-            for(int m = 0 ; m < aList.length ; m ++){
-                r+=aList[m]*getQ(m,k);
-            }
-            putR(k,i,r);
-            for (int m = 0 ;m < aList.length ;m ++){
-                bList[m] -= getR(k,i)*getQ(m,k);
-//                bList.set(m,bList.get(m) -getR(k,i)*getQ(m,k));
-            }
-        }
-
-        double temp = 0d;
-
-        for(int x = 0 ; x < aList.length ; x++){
-            temp += Functions.SQUARE.apply(bList[x]);
-        }
-        double s = Functions.SQRT.apply(temp);
-        putR(i,i,s);
-        for (int x = 0 ; x <aList.length ; x++){
-            putQ(x,i,bList[x]/s);
-            context.write(new IntWritable(i),new IntWritable(x));
-        }
-//         cheng
-//         for(int ii = 0 ; ii < aList.size() ; ii ++){
-//             for(jj = 0 ; )
-//         }
-
-
+        int i = key.get();
+         for (int j = 0 ; j< integerArrayList.size() ;j++){
+             double temp = 0;
+             for (int k =0 ; k < integerArrayList.size() ; k++){
+                 temp += getR(i,k)*getQ(k,j);
+             }
+             Put put = new Put(String.valueOf(i).getBytes());
+             put.add(Tools.LAPLACIAN_FAMILY_NAME.getBytes(),String.valueOf(j).getBytes(),String.valueOf(temp).getBytes());
+             context.write(null,put);
+         }
     }
 
     private Double getQ(int i , int j) throws IOException {
@@ -105,7 +72,7 @@ public class QrMapper extends TableMapper<IntWritable,IntWritable> {
         Result secondRes = rTable.get(get);
         List<Cell> secondCells = secondRes.listCells();
         if(secondCells != null){
-        return  Double.valueOf(new String(CellUtil.cloneValue(secondCells.get(0))));
+            return  Double.valueOf(new String(CellUtil.cloneValue(secondCells.get(0))));
         }else {
             return 0d;
         }
@@ -122,6 +89,4 @@ public class QrMapper extends TableMapper<IntWritable,IntWritable> {
         put.add(Tools.R_FAMILY_NAME.getBytes(),String.valueOf(j).getBytes(),String.valueOf(value).getBytes());
         rTable.put(put);
     }
-
-
 }

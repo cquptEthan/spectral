@@ -32,12 +32,12 @@ import java.util.regex.Pattern;
 public class InitInputMapper extends TableMapper<NullWritable,NullWritable> {
     private HTable initTable;
     private HTable affinityTable;
-    private double omg = 1000d;
+    private double omg = 10000d;
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         Configuration configuration = HBaseConfiguration.create();
-        configuration.set("hbase.zookeeper.quorum", "scmhadoop-1");
+        configuration.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
         initTable = new HTable(configuration, Tools.INIT_TABLE_NAME);
         affinityTable = new HTable(configuration, Tools.AFFINITY_TABLE_NAME);
     }

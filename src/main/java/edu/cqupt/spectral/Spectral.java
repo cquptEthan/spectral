@@ -9,6 +9,8 @@ import edu.cqupt.spectral.conf.Tools;
 import edu.cqupt.spectral.diagonalize.DiagonalizeJob;
 import edu.cqupt.spectral.input.InitInputJob;
 import edu.cqupt.spectral.laplacian.LaplacianJob;
+import edu.cqupt.spectral.qr.QrJob;
+import edu.cqupt.spectral.sort.SortJob;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -170,10 +172,21 @@ public class Spectral{
             admin.disableTable(Tools.SVD_TABLE_NAME);
             admin.deleteTable(Tools.SVD_TABLE_NAME);
         }
+
+        if(admin.tableExists(Tools.Q_TABLE_NAME)){
+            admin.disableTable(Tools.Q_TABLE_NAME);
+            admin.deleteTable(Tools.Q_TABLE_NAME);
+        }
+
+        if(admin.tableExists(Tools.R_TABLE_NAME)){
+            admin.disableTable(Tools.R_TABLE_NAME);
+            admin.deleteTable(Tools.R_TABLE_NAME);
+        }
         
         HTableDescriptor initTableDesc = new HTableDescriptor(Tools.INIT_TABLE_NAME);
         initTableDesc.addFamily(new HColumnDescriptor(Tools.INIT_FAMILY_NAME));
         initTableDesc.setMaxFileSize(1145720);
+//        initTableDesc.set
         admin.createTable(initTableDesc);
         Random random = new Random(System.currentTimeMillis());
         HTable initTable = new HTable(configuration,Tools.INIT_TABLE_NAME);
@@ -194,9 +207,13 @@ public class Spectral{
         }
         initTable.put(puts);
 
+//        HTable
         HTableDescriptor affinityTableDesc = new HTableDescriptor(Tools.AFFINITY_TABLE_NAME);
-        affinityTableDesc.addFamily(new HColumnDescriptor(Tools.AFFINITY_FAMILY_NAME));
-//        affinityTableDesc.getMaxFileSize()
+        HColumnDescriptor affinityColumnDescriptor = new HColumnDescriptor(Tools.AFFINITY_FAMILY_NAME) ;
+        affinityColumnDescriptor.setMaxVersions(1);
+//        affinityColumnDescriptor.set
+        affinityTableDesc.addFamily(affinityColumnDescriptor);
+//        affinityTableDesc.set
         affinityTableDesc.setMaxFileSize(1145720);
         admin.createTable(affinityTableDesc);
 
@@ -240,29 +257,49 @@ public class Spectral{
         admin.createTable(SVDTableDesc);
         HTable SVDTable = new HTable(configuration,Tools.SVD_TABLE_NAME);
 
-        List<Put> SVDPuts = new ArrayList<Put>();
-        for(Long i  = 0L ; i < row ; i++){
-            Put put = new Put(i.toString().getBytes());
-            put.setWriteToWAL(false);
-            put.add(Tools.SVD_FAMILY_NAME.getBytes(),Tools.SVD_VALUE_NAME.toString().getBytes(),"1".getBytes());
-            SVDPuts.add(put);
-            if(SVDPuts.size() > 100){
-                SVDTable.put(SVDPuts);
-                SVDPuts.clear();
-            }
-        }
-        SVDTable.put(SVDPuts);
+//        List<Put> SVDPuts = new ArrayList<Put>();
+//        for(Long i  = 0L ; i < row ; i++){
+//            Put put = new Put(i.toString().getBytes());
+//            put.setWriteToWAL(false);
+//            put.add(Tools.SVD_FAMILY_NAME.getBytes(),Tools.SVD_VALUE_NAME.toString().getBytes(),"1".getBytes());
+//            SVDPuts.add(put);
+//            if(SVDPuts.size() > 100){
+//                SVDTable.put(SVDPuts);
+//                SVDPuts.clear();
+//            }
+//        }
+//        SVDTable.put(SVDPuts);
 
 
         HTableDescriptor laplacianTableDesc = new HTableDescriptor(Tools.LAPLACIAN_TABLE_NAME);
-        laplacianTableDesc.addFamily(new HColumnDescriptor(Tools.LAPLACIAN_FAMILY_NAME));
+        HColumnDescriptor laplacianColumnDescriptor = new HColumnDescriptor(Tools.LAPLACIAN_FAMILY_NAME) ;
+        laplacianColumnDescriptor.setMaxVersions(1);
+        laplacianTableDesc.addFamily(laplacianColumnDescriptor);
         admin.createTable(laplacianTableDesc);
 //        Job job = new Job(configuration,"initHBase");
+
+        HTableDescriptor qTableDesc = new HTableDescriptor(Tools.Q_TABLE_NAME);
+        HColumnDescriptor qColumnDescriptor = new HColumnDescriptor(Tools.Q_FAMILY_NAME) ;
+        qColumnDescriptor.setMaxVersions(1);
+        qTableDesc.addFamily(qColumnDescriptor);
+        admin.createTable(qTableDesc);
+
+        HTableDescriptor rTableDesc = new HTableDescriptor(Tools.R_TABLE_NAME);
+        HColumnDescriptor rColumnDescriptor = new HColumnDescriptor(Tools.R_FAMILY_NAME) ;
+        rColumnDescriptor.setMaxVersions(1);
+        rTableDesc.addFamily(rColumnDescriptor);
+        admin.createTable(rTableDesc);
+
+        HTableDescriptor kmeansTableDesc = new HTableDescriptor(Tools.KMEANS_TABLE_NAME);
+        HColumnDescriptor kmeansColumnDescriptor = new HColumnDescriptor(Tools.KMEANS_FAMILY_NAME) ;
+        kmeansColumnDescriptor.setMaxVersions(1);
+        kmeansTableDesc.addFamily(kmeansColumnDescriptor);
+        admin.createTable(kmeansTableDesc);
 
     }
     public static void main(String[] args) throws Exception {
 
-//        initHbase();
+        initHbase();
         int numDims =100;
         Configuration conf = new Configuration();
         Path tempDir =  new Path( "Spectral");
@@ -272,6 +309,8 @@ public class Spectral{
         InitInputJob.runJob(input,init);
         DiagonalizeJob.runJob(init);
         LaplacianJob.runJob(init);
+        QrJob.iter(1);
+        SortJob.runJob();
 
 
     }

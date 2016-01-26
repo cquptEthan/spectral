@@ -31,7 +31,7 @@ import java.io.IOException;
  * 
  * In essence, this can be treated as a single Vector Element.
  */
-public class IntDoublePairWritable implements Writable {
+public class IntDoublePairWritable implements Writable,Comparable<IntDoublePairWritable> {
   
   private int key;
   private double value;
@@ -72,4 +72,8 @@ public class IntDoublePairWritable implements Writable {
     return value;
   }
 
+    @Override
+    public int compareTo(IntDoublePairWritable o) {
+        return Double.valueOf(this.getValue()).compareTo(Double.valueOf(o.getValue()));  //To change body of implemented methods use File | Settings | File Templates.
+    }
 }
