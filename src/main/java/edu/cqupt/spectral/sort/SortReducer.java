@@ -27,7 +27,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class SortReducer extends TableReducer<IntWritable,IntDoublePairWritable,ImmutableBytesWritable> {
-    private int k;
+//    private int k;
     private HTable qTable;
     private HTable rTable;
     @Override
@@ -36,7 +36,7 @@ public class SortReducer extends TableReducer<IntWritable,IntDoublePairWritable,
         configuration.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
         qTable = new HTable(configuration, Tools.Q_TABLE_NAME);
         rTable = new HTable(configuration, Tools.R_TABLE_NAME);
-        k = 5;
+//        k = 5;
     }
 
     @Override
@@ -49,7 +49,7 @@ public class SortReducer extends TableReducer<IntWritable,IntDoublePairWritable,
         }
         Collections.sort(intDoublePairWritableArrayList);
 
-        for(int i = 0 ; i < k; i++){
+        for(int i = 0 ; i < Tools.K; i++){
             int x = intDoublePairWritableArrayList.get(i).getKey();
             for(int j = 0 ; j < intDoublePairWritableArrayList.size() ; j ++){
                 Put put = new Put(String.valueOf(i).getBytes());
@@ -57,6 +57,8 @@ public class SortReducer extends TableReducer<IntWritable,IntDoublePairWritable,
                 context.write(null,put);
             }
         }
+
+
 //        intDoublePairWritableArrayList.sort(Comparator.<IntDoublePairWritable>naturalOrder());
 
     }

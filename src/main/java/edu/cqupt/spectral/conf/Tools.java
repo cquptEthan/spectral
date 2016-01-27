@@ -29,6 +29,7 @@ public class Tools {
     public  static  final String R_TABLE_NAME = "spectral_r";
     public  static  final String KMEANS_TABLE_NAME = "spectral_kmeans";
     public  static  final String KMEANS_FAMILY_NAME = "col";
+    public  static  final String KMEANS_VALUE_NAME = "col";
     public  static  final String SVD_FAMILY_NAME = "col";
     public  static  final String Q_FAMILY_NAME = "col";
     public  static  final String R_FAMILY_NAME = "col";
@@ -41,6 +42,9 @@ public class Tools {
 
     public  static final Long ROW= 20L;      //100M
     public  static  final  Long COL = 150L;
+
+    public  static  final  int K = 8;
+    public  static  final  int X = 3;
 
 //    public  static final Long ROW= 22L;
 //    public  static  final  Long COL = 15L;
@@ -60,5 +64,28 @@ public class Tools {
                      new SequenceFileValueIterator<>(input, true, conf)){
             return iterator.next().get();
         }
+    }
+
+    public static int[] randomCommon(int min, int max, int n){
+        if (n > (max - min + 1) || max < min) {
+            return null;
+        }
+        int[] result = new int[n];
+        int count = 0;
+        while(count < n) {
+            int num = (int) (Math.random() * (max - min)) + min;
+            boolean flag = true;
+            for (int j = 0; j < n; j++) {
+                if(num == result[j]){
+                    flag = false;
+                    break;
+                }
+            }
+            if(flag){
+                result[count] = num;
+                count++;
+            }
+        }
+        return result;
     }
 }
