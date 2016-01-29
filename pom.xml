@@ -126,11 +126,11 @@
             <artifactId>hbase-server</artifactId>
             <version>0.98.3-hadoop2</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.apache.hbase</groupId>-->
-            <!--<artifactId>hbase-hadoop2-compat</artifactId>-->
-            <!--<version>0.98.3-hadoop2</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase-hadoop2-compat</artifactId>
+            <version>0.98.3-hadoop2</version>
+        </dependency>
     </dependencies>
 
     <build>

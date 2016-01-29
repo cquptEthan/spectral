@@ -48,17 +48,17 @@ public class SortReducer extends TableReducer<IntWritable,IntDoublePairWritable,
             intDoublePairWritableArrayList.add(intDoublePairWritable);
         }
         Collections.sort(intDoublePairWritableArrayList);
-
+        int[] xx =Tools.randomCommon(0,Integer.valueOf(String.valueOf(Tools.ROW)),Tools.K);
         for(int i = 0 ; i < Tools.K; i++){
-            int x = intDoublePairWritableArrayList.get(i).getKey();
+//            int x = intDoublePairWritableArrayList.get(i).getKey();
             for(int j = 0 ; j < intDoublePairWritableArrayList.size() ; j ++){
                 Put put = new Put(String.valueOf(i).getBytes());
-                put.add(Tools.SVD_FAMILY_NAME.getBytes(),String.valueOf(j).getBytes(),getQ(x,j).toString().getBytes());
+                //todo
+                put.add(Tools.SVD_FAMILY_NAME.getBytes(),String.valueOf(j).getBytes(),getQ(xx[i],j).toString().getBytes());
+//                put.add(Tools.SVD_FAMILY_NAME.getBytes(),String.valueOf(j).getBytes(),getQ(x,j).toString().getBytes());
                 context.write(null,put);
             }
         }
-
-
 //        intDoublePairWritableArrayList.sort(Comparator.<IntDoublePairWritable>naturalOrder());
 
     }

@@ -19,7 +19,8 @@ import java.util.Arrays;
  */
 public class Tools {
 //    public  static  final String ZOOKEEPER ="localhost";
-    public  static  final String ZOOKEEPER ="scmhadoop-1,scmhadoop-2,scmhadoop-3";
+//    public  static  final String ZOOKEEPER ="scmhadoop-1,scmhadoop-2,scmhadoop-3";
+    public  static  final String ZOOKEEPER ="cqupt-01,cqupt-02,cqupt-03";
     public  static  final String INIT_TABLE_NAME = "spectral_init";
     public  static  final String AFFINITY_TABLE_NAME = "spectral_affinity";
     public  static  final String DIAGONALIZE_TABLE_NAME = "spectral_diagonalize";
@@ -33,18 +34,20 @@ public class Tools {
     public  static  final String SVD_FAMILY_NAME = "col";
     public  static  final String Q_FAMILY_NAME = "col";
     public  static  final String R_FAMILY_NAME = "col";
-    public  static  final String SVD_VALUE_NAME = "value";
+    public  static  final String SVD_VALUE_NAME = "group";
     public  static  final String LAPLACIAN_FAMILY_NAME = "col";
     public  static  final String INIT_FAMILY_NAME = "col";
     public  static  final String AFFINITY_FAMILY_NAME = "col";
     public  static  final String DIAGONALIZE_FAMILY_NAME = "col";
     public  static  final String DIAGONALIZE_VALUE_NAME = "value";
 
-    public  static final Long ROW= 20L;      //100M
-    public  static  final  Long COL = 150L;
-
-    public  static  final  int K = 8;
-    public  static  final  int X = 3;
+    public  static  Long ROW= 20L;      //100M
+    public  static    Long COL = 150L;
+    public  static    int K = 8;
+    public  static    int X = 3;
+    public  static    double OMG = 10000d;
+    public  static    int QR = 10;
+    public  static    int KMEANS = 10;
 
 //    public  static final Long ROW= 22L;
 //    public  static  final  Long COL = 15L;

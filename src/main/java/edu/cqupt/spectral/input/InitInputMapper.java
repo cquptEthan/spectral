@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 public class InitInputMapper extends TableMapper<NullWritable,NullWritable> {
     private HTable initTable;
     private HTable affinityTable;
-    private double omg = 10000d;
+//    private double omg = 10000d;
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
@@ -75,7 +75,7 @@ public class InitInputMapper extends TableMapper<NullWritable,NullWritable> {
                           Double.valueOf(new String(CellUtil.cloneValue(secondCells.get(i)))));
             squareSum += square;
         }
-        similarity = Math.exp(-squareSum/(2*omg*omg));
+        similarity = Math.exp(-squareSum/(2*Tools.OMG*Tools.OMG));
         return similarity;
     }
 }

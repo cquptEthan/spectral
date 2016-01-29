@@ -1,9 +1,7 @@
 package edu.cqupt.spectral;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import edu.cqupt.spectral.conf.Tools;
 import edu.cqupt.spectral.diagonalize.DiagonalizeJob;
@@ -14,12 +12,8 @@ import edu.cqupt.spectral.qr.QrJob;
 import edu.cqupt.spectral.sort.SortJob;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.*;
+import org.apache.hadoop.hbase.client.*;
 import org.apache.mahout.common.HadoopUtil;
 
 /**
@@ -29,16 +23,16 @@ import org.apache.mahout.common.HadoopUtil;
  * Time: 10:19 AM
  * To change this template use File | Settings | File Templates.
  */
-public class Spectral{
+public class Spectral {
     public static void initHbase() throws IOException {
         Long row = Tools.ROW;
         Long col = Tools.COL;
         Configuration configuration = HBaseConfiguration.create();
         HBaseAdmin admin = new HBaseAdmin(configuration);
-        
+
         if(admin.tableExists(Tools.INIT_TABLE_NAME)){
-        admin.disableTable(Tools.INIT_TABLE_NAME);
-        admin.deleteTable(Tools.INIT_TABLE_NAME);
+            admin.disableTable(Tools.INIT_TABLE_NAME);
+            admin.deleteTable(Tools.INIT_TABLE_NAME);
         }
 
         if(admin.tableExists(Tools.AFFINITY_TABLE_NAME)){
@@ -75,7 +69,7 @@ public class Spectral{
             admin.disableTable(Tools.KMEANS_TABLE_NAME);
             admin.deleteTable(Tools.KMEANS_TABLE_NAME);
         }
-        
+
         HTableDescriptor initTableDesc = new HTableDescriptor(Tools.INIT_TABLE_NAME);
         initTableDesc.addFamily(new HColumnDescriptor(Tools.INIT_FAMILY_NAME));
         initTableDesc.setMaxFileSize(1145720);
@@ -88,8 +82,8 @@ public class Spectral{
         for(Long i  = 0L ; i < row ; i++){
             Put put = new Put(i.toString().getBytes());
             for(Long j  = 0L ; j < col ; j++){
-               Integer value =  random.nextInt(1000);
-               put.add(Tools.INIT_FAMILY_NAME.getBytes(),j.toString().getBytes(),value.toString().getBytes());
+                Integer value =  random.nextInt(1000);
+                put.add(Tools.INIT_FAMILY_NAME.getBytes(),j.toString().getBytes(),value.toString().getBytes());
             }
             puts.add(put);
             if(puts.size() > 1000){
@@ -172,6 +166,18 @@ public class Spectral{
 
     }
     public static void main(String[] args) throws Exception {
+        System.out.println(args[0]);
+        if(args.length != 7) {
+            System.out.println(args.length);
+            return;
+        }else{
+            Tools.ROW = Long.valueOf(args[0]);
+            Tools.COL = Long.valueOf(args[1]);
+            Tools.K = Integer.valueOf(args[2]);
+            Tools.X = Integer.valueOf(args[3]);
+            Tools.OMG = Double.valueOf(args[4]);
+            Tools.QR = Integer.valueOf(args[5]);
+            Tools.KMEANS = Integer.valueOf(args[6]);
 
         initHbase();
         Configuration conf = new Configuration();
@@ -181,9 +187,45 @@ public class Spectral{
         InitInputJob.runJob(input,init);
         DiagonalizeJob.runJob(init);
         LaplacianJob.runJob(init);
-        QrJob.iter(1);
+        QrJob.iter( Tools.QR);
         SortJob.runJob();
-        KMeansJob.iter(2);
+        KMeansJob.iter(Tools.KMEANS);
+        printResult();
+        }
+    }
 
+    public static void  printResult() throws IOException {
+        Configuration configuration = HBaseConfiguration.create();
+        HTable svdTable = new HTable(configuration, Tools.SVD_TABLE_NAME);
+        ResultScanner rs = null;
+
+        Scan scan = new Scan();
+        scan.addColumn(Tools.SVD_FAMILY_NAME.getBytes(),Tools.SVD_VALUE_NAME.getBytes());
+        rs =  svdTable.getScanner(scan);
+        HashMap<Integer,ArrayList<Integer>> hashMap = new HashMap<>();
+        for(int i = 0 ; i < Tools.X ; i ++){
+            hashMap.put(i,new ArrayList<Integer>());
+        }
+        for (Result r : rs) {
+            List<Cell> cells = r.listCells();
+            if(cells != null ){
+                for (Cell cell : cells) {
+                    hashMap.get(Integer.valueOf(new String(CellUtil.cloneValue(cell)))).add(Integer.valueOf(new String(r.getRow())));
+                }
+            }
+        }
+
+        Iterator iter = hashMap.entrySet().iterator();
+        while (iter.hasNext()) {
+            Map.Entry entry = (Map.Entry) iter.next();
+            Integer key = (Integer) entry.getKey();
+            ArrayList<Integer> val = (ArrayList<Integer>) entry.getValue();
+            System.out.println("Num : " + key + " group:");
+            for (Integer i : val){
+                System.out.print(i);
+                System.out.print(",");
+            }
+            System.out.print('\n');
+            }
     }
 }

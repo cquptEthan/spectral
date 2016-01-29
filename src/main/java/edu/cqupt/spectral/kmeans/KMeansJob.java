@@ -7,13 +7,8 @@ import edu.cqupt.spectral.qr.QrMapper;
 import edu.cqupt.spectral.qr.QrReducer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.*;
+import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
@@ -22,6 +17,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.mahout.common.HadoopUtil;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,10 +27,12 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class KMeansJob {
+    private static HTable svdTable;
     public static void iter(Integer k) throws InterruptedException, IOException, ClassNotFoundException {
         Configuration configuration = HBaseConfiguration.create();
+        svdTable = new HTable(configuration, Tools.SVD_TABLE_NAME);
 //        configuration.set("hbase.zookeeper.quorum", "scmhadoop-1");
-//        configuration.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
+        configuration.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
         HBaseAdmin admin = new HBaseAdmin(configuration);
         if(admin.tableExists(Tools.KMEANS_TABLE_NAME)){
             admin.disableTable(Tools.KMEANS_TABLE_NAME);
@@ -49,10 +47,14 @@ public class KMeansJob {
         HTable hTable = new HTable(configuration,Tools.KMEANS_TABLE_NAME);
 
       int[] xCenter =  Tools.randomCommon(0,Tools.K,Tools.X);
+
+
         for(int i = 0 ; i < xCenter.length ; i ++){
-            Put put = new Put(String.valueOf(xCenter).getBytes());
-            put.add(Tools.KMEANS_FAMILY_NAME.getBytes(),Tools.KMEANS_VALUE_NAME.getBytes(),String.valueOf(xCenter).getBytes());
-            hTable.put(put);
+            for(int j = 0 ; j < Tools.ROW ; j++){
+                Put put = new Put(String.valueOf(i).getBytes());
+                put.add(Tools.KMEANS_FAMILY_NAME.getBytes(),String.valueOf(j).getBytes(),String.valueOf(Double.valueOf(getSvd(xCenter[i],j))).getBytes());
+                hTable.put(put);
+            }
         }
 
         for (int i = 0 ; i < k ; i ++){
@@ -64,7 +66,7 @@ public class KMeansJob {
 
 
         String sourceTable = Tools.SVD_TABLE_NAME;
-        String targetTable = Tools.KMEANS_TABLE_NAME;
+        String targetTable = Tools.SVD_TABLE_NAME;
         Configuration conf = new Configuration();
         conf.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
         Job job = new Job(conf, "KmeansJob");
@@ -74,7 +76,7 @@ public class KMeansJob {
                 scan,               // Scan instance to control CF and attribute selection
                 KMeansMapper.class,     // mapper class
                 IntWritable.class,         // mapper output key
-                IntDoublePairWritable.class,  // mapper output value
+                IntWritable.class,  // mapper output value
                 job);
 
         TableMapReduceUtil.initTableReducerJob(
@@ -86,6 +88,18 @@ public class KMeansJob {
         boolean succeeded = job.waitForCompletion(true);
         if (!succeeded) {
             throw new IllegalStateException("Job failed!");
+        }
+    }
+
+    private static double getSvd(int i,int j) throws IOException {
+        Get get = new Get(String.valueOf(i).getBytes());
+        get.addColumn(Tools.SVD_FAMILY_NAME.getBytes(),String.valueOf(j).getBytes());
+        Result secondRes = svdTable.get(get);
+        List<Cell> secondCells = secondRes.listCells();
+        if(secondCells != null){
+            return  Double.valueOf(new String(CellUtil.cloneValue(secondCells.get(0))));
+        }else {
+            return 0d;
         }
     }
 }

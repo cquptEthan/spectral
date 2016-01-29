@@ -29,11 +29,11 @@ import java.util.List;
  * Time: 11:35 AM
  * To change this template use File | Settings | File Templates.
  */
-public class KMeansMapper extends TableMapper<IntWritable,IntDoublePairWritable>{
+public class KMeansMapper extends TableMapper<IntWritable,IntWritable>{
 
     private HTable kTable;
     private HTable svdTable;
-    private List<Integer> kmeansPoint;
+    private List<double[]> kmeansPoint;
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         Configuration configuration = HBaseConfiguration.create();
@@ -50,59 +50,56 @@ public class KMeansMapper extends TableMapper<IntWritable,IntDoublePairWritable>
         double [] aList = new double[cells.size()];
         int i = Integer.valueOf(new String(key.get())) ;
         for (Cell cell : cells) {
+            if(!new String(CellUtil.cloneQualifier(cell)).equals(Tools.SVD_VALUE_NAME)){
             int j = Integer.valueOf(new String(CellUtil.cloneQualifier(cell)));
             aList[j] =  Double.valueOf(new String(CellUtil.cloneValue(cell)));
+            }
         }
+        //取X个中心点
         for (int x = 0 ; x < kmeansPoint.size() ; x ++){
             IntDoublePairWritable intDoublePairWritable = new IntDoublePairWritable();
-            double [] bList  = new double[cells.size()];
-            for(int n = 0 ; n < cells.size() ; n ++){
-                bList[n] = getSvd(kmeansPoint.get(x),n);
-            }
+            double [] bList  = kmeansPoint.get(x);
+//            for(int n = 0 ; n < cells.size() ; n ++){
+//                bList[n] = getSvd(kmeansPoint.get(x),n);
+//            }
             intDoublePairWritable.setKey(x);
             intDoublePairWritable.setValue(diff(aList,bList));
             diffList.add(intDoublePairWritable);
         }
+        //相似度排序
         Collections.sort(diffList);
-        context.write(new IntWritable(0),diffList.get(0));
+//        Collections.reverse(diffList);
+//        diffList.
+        context.write(new IntWritable(diffList.get(0).getKey()),new IntWritable(i));
     }
 
     private double diff(double[] xs , double[] ys ){
         double diff = 0d;
         double sum = 0d;
-        for(int i =0 ; i < xs.length; i++){
+        for(int i =0 ; i < ys.length; i++){
             sum += Functions.SQUARE.apply(xs[i] - ys[i]);
         }
         return Functions.SQRT.apply(sum);
     }
 
-    private double getSvd(int i,int j) throws IOException {
-        Get get = new Get(String.valueOf(i).getBytes());
-        get.addColumn(Tools.SVD_FAMILY_NAME.getBytes(),String.valueOf(j).getBytes());
-        Result secondRes = svdTable.get(get);
-        List<Cell> secondCells = secondRes.listCells();
-        if(secondCells != null){
-            return  Double.valueOf(new String(CellUtil.cloneValue(secondCells.get(0))));
-        }else {
-            return 0d;
-        }
-    }
 
-    private ArrayList<Integer> getKmeans () throws IOException {
-        ArrayList<Integer> ids = new ArrayList<Integer>();
+
+    private List<double[]> getKmeans () throws IOException {
+//        List<double[]> ids = new ArrayList<double[]>();
         ResultScanner rs = null;
         Scan scan = new Scan();
         rs =  kTable.getScanner(scan);
 //        ids.toArray();
         //统计记录条数
+        List<double[]> ids = new ArrayList<double[]>();
         for (Result r : rs) {
             List<Cell> cells = r.listCells();
             if(cells != null ){
+                double[] dif = new double[cells.size()];
                 for (Cell cell : cells) {
-                    if (new String(CellUtil.cloneQualifier(cell)).equals(Tools.KMEANS_VALUE_NAME)) {
-                        ids.add(Integer.valueOf(new String(CellUtil.cloneValue(cell))));
-                    }
+                    dif[Integer.valueOf(new String(CellUtil.cloneQualifier(cell)))] =  Double.valueOf(new String(CellUtil.cloneValue(cell)));
                 }
+                ids.add(dif);
             }
         }
         return ids;

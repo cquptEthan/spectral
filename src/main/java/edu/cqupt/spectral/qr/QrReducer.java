@@ -31,7 +31,7 @@ public class QrReducer extends TableReducer<IntWritable,IntWritable,ImmutableByt
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         Configuration configuration = HBaseConfiguration.create();
-        configuration.set("hbase.zookeeper.quorum", "scmhadoop-1");
+        configuration.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
         qTable = new HTable(configuration, Tools.Q_TABLE_NAME);
         rTable = new HTable(configuration, Tools.R_TABLE_NAME);
     }
