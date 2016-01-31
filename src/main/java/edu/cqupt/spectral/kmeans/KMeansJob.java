@@ -46,11 +46,11 @@ public class KMeansJob {
 
         HTable hTable = new HTable(configuration,Tools.KMEANS_TABLE_NAME);
 
-      int[] xCenter =  Tools.randomCommon(0,Tools.K,Tools.X);
+      int[] xCenter =  Tools.randomCommon(0,Integer.valueOf(String.valueOf(Tools.ROW)),Tools.X);
 
 
         for(int i = 0 ; i < xCenter.length ; i ++){
-            for(int j = 0 ; j < Tools.ROW ; j++){
+            for(int j = 0 ; j < Tools.K ; j++){
                 Put put = new Put(String.valueOf(i).getBytes());
                 put.add(Tools.KMEANS_FAMILY_NAME.getBytes(),String.valueOf(j).getBytes(),String.valueOf(Double.valueOf(getSvd(xCenter[i],j))).getBytes());
                 hTable.put(put);

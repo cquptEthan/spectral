@@ -72,7 +72,7 @@ public class Spectral {
 
         HTableDescriptor initTableDesc = new HTableDescriptor(Tools.INIT_TABLE_NAME);
         initTableDesc.addFamily(new HColumnDescriptor(Tools.INIT_FAMILY_NAME));
-        initTableDesc.setMaxFileSize(1145720);
+        initTableDesc.setMaxFileSize(  Tools.HTABLE );
         admin.createTable(initTableDesc);
         Random random = new Random(System.currentTimeMillis());
         HTable initTable = new HTable(configuration,Tools.INIT_TABLE_NAME);
@@ -97,7 +97,7 @@ public class Spectral {
         HColumnDescriptor affinityColumnDescriptor = new HColumnDescriptor(Tools.AFFINITY_FAMILY_NAME) ;
         affinityColumnDescriptor.setMaxVersions(1);
         affinityTableDesc.addFamily(affinityColumnDescriptor);
-        affinityTableDesc.setMaxFileSize(1145720);
+        affinityTableDesc.setMaxFileSize( Tools.HTABLE);
         admin.createTable(affinityTableDesc);
 
         HTable affinityTable = new HTable(configuration,Tools.AFFINITY_TABLE_NAME);
@@ -137,6 +137,7 @@ public class Spectral {
 
         HTableDescriptor SVDTableDesc = new HTableDescriptor(Tools.SVD_TABLE_NAME);
         SVDTableDesc.addFamily(new HColumnDescriptor(Tools.SVD_FAMILY_NAME));
+        SVDTableDesc.setMaxFileSize( Tools.HTABLE);
         admin.createTable(SVDTableDesc);
         HTable SVDTable = new HTable(configuration,Tools.SVD_TABLE_NAME);
 
@@ -144,6 +145,7 @@ public class Spectral {
         HColumnDescriptor laplacianColumnDescriptor = new HColumnDescriptor(Tools.LAPLACIAN_FAMILY_NAME) ;
         laplacianColumnDescriptor.setMaxVersions(1);
         laplacianTableDesc.addFamily(laplacianColumnDescriptor);
+        laplacianTableDesc.setMaxFileSize( Tools.HTABLE);
         admin.createTable(laplacianTableDesc);
 
         HTableDescriptor qTableDesc = new HTableDescriptor(Tools.Q_TABLE_NAME);
@@ -178,6 +180,7 @@ public class Spectral {
             Tools.OMG = Double.valueOf(args[4]);
             Tools.QR = Integer.valueOf(args[5]);
             Tools.KMEANS = Integer.valueOf(args[6]);
+            Tools.HTABLE =  Integer.valueOf(args[7]);
 
         initHbase();
         Configuration conf = new Configuration();

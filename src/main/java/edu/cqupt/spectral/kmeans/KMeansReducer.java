@@ -55,7 +55,7 @@ public class KMeansReducer extends TableReducer<IntWritable,IntWritable,Immutabl
 //                svdTable.put(put);
 
 
-        for(int i =0 ; i < Tools.ROW ; i ++){
+        for(int i =0 ; i < Tools.K ; i ++){
         double sum = 0d;
            for (int j = 0 ; j < idList.size() ; j ++){
                sum += getSvd(j,i);

@@ -49,12 +49,12 @@ public class SortReducer extends TableReducer<IntWritable,IntDoublePairWritable,
         }
         Collections.sort(intDoublePairWritableArrayList);
         int[] xx =Tools.randomCommon(0,Integer.valueOf(String.valueOf(Tools.ROW)),Tools.K);
-        for(int i = 0 ; i < Tools.K; i++){
+        for(int i = 0 ; i < intDoublePairWritableArrayList.size() ; i++){
 //            int x = intDoublePairWritableArrayList.get(i).getKey();
-            for(int j = 0 ; j < intDoublePairWritableArrayList.size() ; j ++){
+            for(int j = 0 ; j < Tools.K ; j ++){
                 Put put = new Put(String.valueOf(i).getBytes());
                 //todo
-                put.add(Tools.SVD_FAMILY_NAME.getBytes(),String.valueOf(j).getBytes(),getQ(xx[i],j).toString().getBytes());
+                put.add(Tools.SVD_FAMILY_NAME.getBytes(),String.valueOf(j).getBytes(),getQ(i,xx[j]).toString().getBytes());
 //                put.add(Tools.SVD_FAMILY_NAME.getBytes(),String.valueOf(j).getBytes(),getQ(x,j).toString().getBytes());
                 context.write(null,put);
             }

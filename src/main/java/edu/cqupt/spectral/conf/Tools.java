@@ -48,6 +48,7 @@ public class Tools {
     public  static    double OMG = 10000d;
     public  static    int QR = 10;
     public  static    int KMEANS = 10;
+    public  static    int HTABLE = 1145720;
 
 //    public  static final Long ROW= 22L;
 //    public  static  final  Long COL = 15L;
