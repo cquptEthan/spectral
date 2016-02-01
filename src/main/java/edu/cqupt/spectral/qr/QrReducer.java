@@ -30,6 +30,7 @@ public class QrReducer extends TableReducer<IntWritable,IntWritable,ImmutableByt
     private HTable rTable;
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
+        Tools.setConf(context.getConfiguration());
         Configuration configuration = HBaseConfiguration.create();
         configuration.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
         qTable = new HTable(configuration, Tools.Q_TABLE_NAME);
@@ -42,11 +43,14 @@ public class QrReducer extends TableReducer<IntWritable,IntWritable,ImmutableByt
         for(IntWritable intWritable : values){
             integerArrayList.add(intWritable.get());
         }
+        double [][]qList  = getQList();
+        double [][]rList  = getRList();
         int i = key.get();
          for (int j = 0 ; j< integerArrayList.size() ;j++){
-             double temp = 0;
+             double temp = 0d;
              for (int k =0 ; k < integerArrayList.size() ; k++){
-                 temp += getR(i,k)*getQ(k,j);
+//                 temp += getR(i,k)*getQ(k,j);
+                 temp += rList[i][k]*qList[k][j];
              }
              Put put = new Put(String.valueOf(i).getBytes());
              put.add(Tools.LAPLACIAN_FAMILY_NAME.getBytes(),String.valueOf(j).getBytes(),String.valueOf(temp).getBytes());
@@ -88,5 +92,37 @@ public class QrReducer extends TableReducer<IntWritable,IntWritable,ImmutableByt
         Put put = new Put(String.valueOf(i).getBytes());
         put.add(Tools.R_FAMILY_NAME.getBytes(),String.valueOf(j).getBytes(),String.valueOf(value).getBytes());
         rTable.put(put);
+    }
+
+    private double[][] getQList() throws IOException {
+        ResultScanner rs = null;
+        Scan scan = new Scan();
+        rs =  qTable.getScanner(scan);
+        double[][] ids = new double[Integer.valueOf(String.valueOf(Tools.ROW))][Integer.valueOf(String.valueOf(Tools.ROW))];
+        for (Result r : rs) {
+            List<Cell> cells = r.listCells();
+            if(cells != null ){
+                for (Cell cell : cells) {
+                    ids[Integer.valueOf(new String(CellUtil.cloneRow(cell)))][Integer.valueOf(new String(CellUtil.cloneQualifier(cell)))] =  Double.valueOf(new String(CellUtil.cloneValue(cell)));
+                }
+            }
+        }
+        return ids;
+    }
+    private double[][] getRList() throws IOException {
+        ResultScanner rs = null;
+        Scan scan = new Scan();
+        rs =  rTable.getScanner(scan);
+        double[][] ids = new double[Integer.valueOf(String.valueOf(Tools.ROW))][Integer.valueOf(String.valueOf(Tools.ROW))];
+        for (Result r : rs) {
+            List<Cell> cells = r.listCells();
+            if(cells != null ){
+
+                for (Cell cell : cells) {
+                    ids[Integer.valueOf(new String(CellUtil.cloneRow(cell)))][Integer.valueOf(new String(CellUtil.cloneQualifier(cell)))] =  Double.valueOf(new String(CellUtil.cloneValue(cell)));
+                }
+            }
+        }
+        return ids;
     }
 }

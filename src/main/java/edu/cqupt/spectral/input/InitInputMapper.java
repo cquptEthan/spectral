@@ -36,6 +36,7 @@ public class InitInputMapper extends TableMapper<NullWritable,NullWritable> {
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
+        Tools.setConf(context.getConfiguration());
         Configuration configuration = HBaseConfiguration.create();
         configuration.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
         initTable = new HTable(configuration, Tools.INIT_TABLE_NAME);

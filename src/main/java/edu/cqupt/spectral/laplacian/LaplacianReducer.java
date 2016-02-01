@@ -20,6 +20,11 @@ import java.io.IOException;
  */
 public class LaplacianReducer extends TableReducer<IntWritable,IntDoublePairWritable,ImmutableBytesWritable> {
     @Override
+    protected void setup(Context context) throws IOException, InterruptedException {
+        Tools.setConf(context.getConfiguration());
+    }
+
+    @Override
     protected void reduce(IntWritable key, Iterable<IntDoublePairWritable> values, Context context) throws IOException, InterruptedException {
 
         for(IntDoublePairWritable intDoublePairWritable : values){

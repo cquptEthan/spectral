@@ -30,6 +30,11 @@ import java.util.List;
 public  class DiagonazlizeMapper
         extends TableMapper<IntWritable,DoubleWritable> {
     @Override
+    protected void setup(Context context) throws IOException, InterruptedException {
+        Tools.setConf(context.getConfiguration());
+    }
+
+    @Override
     protected void map(ImmutableBytesWritable key, Result value, Context context) throws IOException, InterruptedException {
         DoubleWritable doubleWritable = new DoubleWritable();
         double sum = 0d;

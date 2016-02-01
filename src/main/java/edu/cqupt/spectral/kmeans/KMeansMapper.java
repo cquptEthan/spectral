@@ -36,6 +36,7 @@ public class KMeansMapper extends TableMapper<IntWritable,IntWritable>{
     private List<double[]> kmeansPoint;
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
+        Tools.setConf(context.getConfiguration());
         Configuration configuration = HBaseConfiguration.create();
         configuration.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
         svdTable = new HTable(configuration, Tools.SVD_TABLE_NAME);

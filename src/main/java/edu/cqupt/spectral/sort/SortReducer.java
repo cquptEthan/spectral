@@ -32,6 +32,7 @@ public class SortReducer extends TableReducer<IntWritable,IntDoublePairWritable,
     private HTable rTable;
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
+        Tools.setConf(context.getConfiguration());
         Configuration configuration = HBaseConfiguration.create();
         configuration.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
         qTable = new HTable(configuration, Tools.Q_TABLE_NAME);

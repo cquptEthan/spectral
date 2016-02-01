@@ -22,12 +22,11 @@ import java.io.IOException;
  */
 public class SortJob {
 
-    public static void runJob()
+    public static void runJob(Configuration conf)
             throws IOException, ClassNotFoundException, InterruptedException {
         String sourceTable = Tools.LAPLACIAN_TABLE_NAME;
         String targetTable = Tools.SVD_TABLE_NAME;
         // set up all the job tasks
-        Configuration conf = new Configuration();
         conf.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
         Job job = new Job(conf, "Sort");
         Scan scan = new Scan();

@@ -24,12 +24,11 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class LanczosJob {
-    public static void runJob()
+    public static void runJob(Configuration conf)
             throws IOException, ClassNotFoundException, InterruptedException {
         String sourceTable = Tools.AFFINITY_TABLE_NAME;
         String targetTable = Tools.DIAGONALIZE_TABLE_NAME;
         // set up all the job tasks
-        Configuration conf = new Configuration();
         conf.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
         Job job = new Job(conf, "DiagonalizeJob");
         Scan scan = new Scan();

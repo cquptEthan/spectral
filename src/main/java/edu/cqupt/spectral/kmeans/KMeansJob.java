@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class KMeansJob {
     private static HTable svdTable;
-    public static void iter(Integer k) throws InterruptedException, IOException, ClassNotFoundException {
+    public static void iter( Configuration conf , Integer k) throws InterruptedException, IOException, ClassNotFoundException {
         Configuration configuration = HBaseConfiguration.create();
         svdTable = new HTable(configuration, Tools.SVD_TABLE_NAME);
 //        configuration.set("hbase.zookeeper.quorum", "scmhadoop-1");
@@ -58,16 +58,15 @@ public class KMeansJob {
         }
 
         for (int i = 0 ; i < k ; i ++){
-            runJob();
+            runJob(conf);
         }
     }
-    public static void runJob()
+    public static void runJob( Configuration conf)
             throws IOException, InterruptedException, ClassNotFoundException {
 
 
         String sourceTable = Tools.SVD_TABLE_NAME;
         String targetTable = Tools.SVD_TABLE_NAME;
-        Configuration conf = new Configuration();
         conf.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
         Job job = new Job(conf, "KmeansJob");
         Scan scan = new Scan();

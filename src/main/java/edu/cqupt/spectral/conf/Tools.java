@@ -92,4 +92,16 @@ public class Tools {
         }
         return result;
     }
+
+    public static void setConf(Configuration conf){
+        Tools.ROW =  Long.valueOf(conf.get("ROW"));
+        Tools.COL =  Long.valueOf(conf.get("COL"));
+        Tools.K =  Integer.valueOf(conf.get("K"));
+        Tools.X =  Integer.valueOf(conf.get("X"));
+        Tools.QR =  Integer.valueOf(conf.get("QR"));
+        Tools.KMEANS =  Integer.valueOf(conf.get("KMEANS"));
+        Tools.HTABLE =  Integer.valueOf(conf.get("HTABLE"));
+        Tools.OMG =  Double.valueOf(conf.get("OMG"));
+
+    }
 }

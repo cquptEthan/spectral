@@ -24,6 +24,12 @@ import java.io.IOException;
  */
 public class DiagonalizeReducer
         extends TableReducer<IntWritable,DoubleWritable,ImmutableBytesWritable> {
+
+    @Override
+    protected void setup(Context context) throws IOException, InterruptedException {
+        Tools.setConf(context.getConfiguration());
+    }
+
     @Override
     protected void reduce(IntWritable key, Iterable<DoubleWritable> values, Context context) throws IOException, InterruptedException {
          Put put = new Put(key.toString().getBytes());

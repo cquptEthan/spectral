@@ -31,6 +31,7 @@ public class KMeansReducer extends TableReducer<IntWritable,IntWritable,Immutabl
     private HTable svdTable;
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
+        Tools.setConf(context.getConfiguration());
         Configuration configuration = HBaseConfiguration.create();
         configuration.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
         kTable = new HTable(configuration, Tools.KMEANS_TABLE_NAME);

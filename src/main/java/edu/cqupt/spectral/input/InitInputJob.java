@@ -24,9 +24,8 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class InitInputJob {
-    public static void runJob(Path input, Path output)
+    public static void runJob( Configuration conf,Path input, Path output)
             throws IOException, InterruptedException, ClassNotFoundException {
-        Configuration conf = new Configuration();
         conf.set("hbase.zookeeper.quorum", Tools.ZOOKEEPER);
         HadoopUtil.delete(conf, output);
 //        conf.setInt(Keys.AFFINITY_DIMENSIONS, rows);

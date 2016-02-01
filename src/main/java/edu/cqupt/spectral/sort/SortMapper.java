@@ -1,5 +1,6 @@
 package edu.cqupt.spectral.sort;
 
+import edu.cqupt.spectral.conf.Tools;
 import edu.cqupt.spectral.model.IntDoublePairWritable;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
@@ -21,6 +22,11 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class SortMapper extends TableMapper<IntWritable,IntDoublePairWritable> {
+    @Override
+    protected void setup(Context context) throws IOException, InterruptedException {
+        Tools.setConf(context.getConfiguration());
+    }
+
     @Override
     protected void map(ImmutableBytesWritable key, Result value, Context context) throws IOException, InterruptedException {
         int i = Integer.valueOf(new String(key.get())) ;

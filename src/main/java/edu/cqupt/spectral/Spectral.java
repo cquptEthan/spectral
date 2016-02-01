@@ -9,6 +9,7 @@ import edu.cqupt.spectral.input.InitInputJob;
 import edu.cqupt.spectral.kmeans.KMeansJob;
 import edu.cqupt.spectral.laplacian.LaplacianJob;
 import edu.cqupt.spectral.qr.QrJob;
+import edu.cqupt.spectral.serial.Serial;
 import edu.cqupt.spectral.sort.SortJob;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -137,7 +138,7 @@ public class Spectral {
 
         HTableDescriptor SVDTableDesc = new HTableDescriptor(Tools.SVD_TABLE_NAME);
         SVDTableDesc.addFamily(new HColumnDescriptor(Tools.SVD_FAMILY_NAME));
-        SVDTableDesc.setMaxFileSize( Tools.HTABLE);
+        SVDTableDesc.setMaxFileSize(Tools.HTABLE);
         admin.createTable(SVDTableDesc);
         HTable SVDTable = new HTable(configuration,Tools.SVD_TABLE_NAME);
 
@@ -145,13 +146,14 @@ public class Spectral {
         HColumnDescriptor laplacianColumnDescriptor = new HColumnDescriptor(Tools.LAPLACIAN_FAMILY_NAME) ;
         laplacianColumnDescriptor.setMaxVersions(1);
         laplacianTableDesc.addFamily(laplacianColumnDescriptor);
-        laplacianTableDesc.setMaxFileSize( Tools.HTABLE);
+        laplacianTableDesc.setMaxFileSize(Tools.HTABLE);
         admin.createTable(laplacianTableDesc);
 
         HTableDescriptor qTableDesc = new HTableDescriptor(Tools.Q_TABLE_NAME);
         HColumnDescriptor qColumnDescriptor = new HColumnDescriptor(Tools.Q_FAMILY_NAME) ;
         qColumnDescriptor.setMaxVersions(1);
         qTableDesc.addFamily(qColumnDescriptor);
+//        qTableDesc.
         admin.createTable(qTableDesc);
 
         HTableDescriptor rTableDesc = new HTableDescriptor(Tools.R_TABLE_NAME);
@@ -168,33 +170,59 @@ public class Spectral {
 
     }
     public static void main(String[] args) throws Exception {
+        Long start = System.currentTimeMillis();
         System.out.println(args[0]);
-        if(args.length != 7) {
+        if(args.length != 9) {
             System.out.println(args.length);
             return;
         }else{
-            Tools.ROW = Long.valueOf(args[0]);
-            Tools.COL = Long.valueOf(args[1]);
-            Tools.K = Integer.valueOf(args[2]);
-            Tools.X = Integer.valueOf(args[3]);
-            Tools.OMG = Double.valueOf(args[4]);
-            Tools.QR = Integer.valueOf(args[5]);
-            Tools.KMEANS = Integer.valueOf(args[6]);
-            Tools.HTABLE =  Integer.valueOf(args[7]);
+            Tools tools = new Tools();
+            Tools.ROW = Long.valueOf(args[1]);
+            Tools.COL = Long.valueOf(args[2]);
+            Tools.K = Integer.valueOf(args[3]);
+            Tools.X = Integer.valueOf(args[4]);
+            Tools.OMG = Double.valueOf(args[5]);
+            Tools.QR = Integer.valueOf(args[6]);
+            Tools.KMEANS = Integer.valueOf(args[7]);
+            Tools.HTABLE =  Integer.valueOf(args[8]);
 
-        initHbase();
-        Configuration conf = new Configuration();
-        Path tempDir =  new Path( "Spectral");
-        Path input = new Path("input");
-        Path init = new Path(tempDir,"init");
-        InitInputJob.runJob(input,init);
-        DiagonalizeJob.runJob(init);
-        LaplacianJob.runJob(init);
-        QrJob.iter( Tools.QR);
-        SortJob.runJob();
-        KMeansJob.iter(Tools.KMEANS);
-        printResult();
+
+            if(args[0].equals("0")){
+
+                System.out.println("并行");
+                initHbase();
+                Configuration conf = new Configuration();
+                conf.set("ROW",Tools.ROW.toString());
+                conf.set("COL",Tools.COL.toString());
+                conf.set("K",String.valueOf(Tools.K));
+                conf.set("X",String.valueOf(Tools.X));
+                conf.set("OMG",String.valueOf(Tools.OMG));
+                conf.set("QR",String.valueOf(Tools.QR));
+                conf.set("KMEANS",String.valueOf(Tools.KMEANS));
+                conf.set("HTABLE",String.valueOf(Tools.HTABLE));
+
+                Path tempDir =  new Path( "Spectral");
+                Path input = new Path("input");
+                Path init = new Path(tempDir,"init");
+                InitInputJob.runJob(conf,input,init);
+                DiagonalizeJob.runJob(conf,init);
+                LaplacianJob.runJob(conf,init);
+                QrJob.iter(conf,Tools.QR);
+                SortJob.runJob(conf);
+                KMeansJob.iter(conf,Tools.KMEANS);
+                printResult();
+
+                System.out.println("Time:" + (System.currentTimeMillis() - start) + "ms");
+
+            }else{
+                System.out.println("串行");
+                Serial serial = new Serial();
+                serial.run();
+
+                System.out.println("Time:" + (System.currentTimeMillis() - start) + "ms");
+            }
         }
+
     }
 
     public static void  printResult() throws IOException {
@@ -229,6 +257,6 @@ public class Spectral {
                 System.out.print(",");
             }
             System.out.print('\n');
-            }
+        }
     }
 }

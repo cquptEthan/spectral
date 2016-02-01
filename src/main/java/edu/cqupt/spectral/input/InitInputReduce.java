@@ -20,6 +20,11 @@ import java.io.IOException;
  */
 public class InitInputReduce extends TableReducer<IntWritable,BytesWritable,ImmutableBytesWritable> {
     @Override
+    protected void setup(Context context) throws IOException, InterruptedException {
+        Tools.setConf(context.getConfiguration());
+    }
+
+    @Override
     protected void reduce(IntWritable key, Iterable<BytesWritable> values, Context context) throws IOException, InterruptedException {
         for (BytesWritable value : values){
         Put put = new Put(key.toString().getBytes());
